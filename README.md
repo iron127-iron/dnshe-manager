@@ -2,10 +2,21 @@
 
 > DNSHE 跨账号多域名自动化集中管理系统
 
-[![构建自建镜像](https://github.com/lioil522/dnshe-manager/actions/workflows/docker.yml/badge.svg)](https://github.com/lioil522/dnshe-manager/actions/workflows/docker.yml)
-[![部署到 Cloudflare](https://github.com/lioil522/dnshe-manager/actions/workflows/deploy.yml/badge.svg)](https://github.com/lioil522/dnshe-manager/actions/workflows/deploy.yml)
+> 📌 **本仓库版本：纯本机运行** — 所有指令统一为根目录 `npm run xxx`，已移除 Cloudflare 部署指令（`deploy` / `wrangler dev`）。数据全部保存在本机 `data/` 目录。
 
-DNSHE-Manager 是一个面向 [DNSHE](https://my.dnshe.com) 用户的**多账号域名集中管理面板**，支持域名资产看板、DNS 解析托管、到期自动续期、多平台通知推送等功能，亦可通过 API Token 绑定 Cloudflare 账号，在独立标签页直接管理托管于 Cloudflare 的域名解析。同一套代码同时支持 **Cloudflare Workers** 和 **Docker 自建** 两种部署形态。
+[![构建自建镜像](https://github.com/lioil522/dnshe-manager/actions/workflows/docker.yml/badge.svg)](https://github.com/lioil522/dnshe-manager/actions/workflows/docker.yml)
+
+DNSHE-Manager 是一个面向 [DNSHE](https://my.dnshe.com) 用户的**多账号域名集中管理面板**，支持域名资产看板、DNS 解析托管、到期自动续期、多平台通知推送等功能，亦可通过 API Token 绑定 Cloudflare 账号，在独立标签页直接管理托管于 Cloudflare 的域名解析。原项目支持 **Cloudflare Workers** 与 **Docker 自建** 两种部署形态；**本仓库仅使用 Node.js 本机直跑**（`npm run dev`），不进行 Cloudflare 部署。
+
+### ⚡ 快速开始（本机运行）
+
+```bash
+npm run setup     # 1. 安装后端 + 前端依赖
+npm run dev       # 2. 构建前端 + 打包后端 + 启动本机服务
+```
+
+浏览器打开 **http://127.0.0.1:8787**，首次进入自行设置管理员用户名与密码。
+完整指令见 [🛠️ 本地开发](#%EF%B8%8F-本地开发)。
 
 ---
 
@@ -69,7 +80,9 @@ graph TD
 
 ## 🚀 部署方式
 
-### 方式一：Cloudflare Workers — GitHub Actions 一键部署（推荐）
+> ⚠️ **本仓库已改为纯本机运行**，不部署 Cloudflare：`package.json` 中的 `deploy`（`wrangler deploy`）与 `dev:backend`（`wrangler dev`）已移除。下面两种部署方式保留作为上游文档参考，日常使用请直接看 [🛠️ 本地开发](#%EF%B8%8F-本地开发)。
+
+### 方式一：Cloudflare Workers — GitHub Actions 一键部署（本仓库已停用）
 
 适合不想自建服务器、追求零运维的用户。Fork 仓库后配置 Secrets，推送到 `main` 即自动部署。
 
@@ -257,44 +270,59 @@ DNSHE-Manager/
 
 ### 前置要求
 
-- **Node.js** ≥ 22.5（自建版需要内置的 `node:sqlite`，Wrangler 4 也要求 ≥ 22）
+- **Node.js** ≥ 22.5（自建版需要内置的 `node:sqlite`）
 - **npm**
-- **Wrangler** ≥ 4（仅 Cloudflare Workers 开发需要，已在 devDependencies 里）
 
-### Cloudflare Workers 模式
+所有指令都收在根目录 `package.json` 的 `scripts` 里，**只需 `npm run xxx`**，不用再 `--prefix frontend`。
+
+### 一键安装
 
 ```bash
-# 安装依赖
-npm install
-npm --prefix frontend install
-
-# ⚠️ 先构建一次前端：wrangler.toml 的 assets.directory 指向 frontend/dist，
-#    该目录不存在时 wrangler dev / deploy 会直接报错退出
-npm --prefix frontend run build
-
-# 启动后端（默认端口 8787，同时把 frontend/dist 当静态资源发出）
-npm run dev
-
-# 改前端时另起 Vite 开发服务器（默认端口 3000，自动代理 /api 到 8787）
-npm --prefix frontend run dev
+npm run setup        # 安装后端 + 前端依赖（等价于 npm install && npm install --prefix frontend）
 ```
 
-### 自建模式
+### 指令总表
+
+| 指令 | 说明 |
+| --- | --- |
+| `npm run setup` | 安装根目录与 `frontend/` 的全部依赖 |
+| `npm run setup:frontend` | 只安装 `frontend/` 依赖 |
+| `npm run dev` | **常用**：构建前端 + 打包后端 + 启动本机服务（等价 `build` → `start:node`） |
+| `npm run start` | 同 `npm run dev` |
+| `npm run dev:frontend` | Vite 开发服务器（端口 3000，热更新，`/api` 自动代理到 8787） |
+| `npm run build` | 构建前端 + 打包后端 → `dist-node/server.mjs` |
+| `npm run build:frontend` | 只构建前端 → `frontend/dist` |
+| `npm run build:frontend:selfhost` | 同源自建版前端（`--mode selfhost`） |
+| `npm run build:node` | 只打包后端（esbuild，约 275 KB 单文件） |
+| `npm run start:node` | 不重新构建，直接运行 `dist-node/server.mjs` |
+| `npm run preview:frontend` | 预览前端构建产物 |
+| `npm run verify` | 自建侧 TypeScript 类型检查（`tsc --noEmit -p server`） |
+| `npm run test` | D1→SQLite 适配层 17 项自检 |
+| `npm run clean:local` | 清理本地构建产物 |
+
+> 🚫 **已移除的指令**（本仓库不部署 Cloudflare）：`deploy`（`wrangler deploy`）、`dev:backend`（`wrangler dev`）。
+
+### 本机数据与备份
+
+`npm run dev` 启动后，所有数据都落在本机，**不依赖任何云端服务**：
+
+| 路径 | 内容 |
+| --- | --- |
+| `data/dnshe.db` | SQLite 数据库（账号、域名缓存、日志、缓存表） |
+| `data/aes.key` | AES-GCM 加密密钥（加密 API Secret 与 2FA 密钥） |
+
+> ⚠️ **备份时必须把 `data/` 整个目录一起备份**：密钥丢失后，数据库中加密的 API Secret 与 2FA 密钥将无法解密。
+> 定时任务为进程内排程，服务停止时不会执行；默认每日北京时间 10:00 同步域名并自动续期（可用 `CRON_UTC_HOUR` / `DISABLE_CRON` 调整）。
+
+### 已验证
 
 ```bash
-# 安装依赖
-npm install
-
-# 类型检查
-npx tsc --noEmit          # Workers 侧
-npm run verify:node       # 自建侧
-
-# 适配层自检
-npm run test:node         # 17 项测试
-
-# 构建与运行
-npm run build:node
-npm run start:node
+npm run setup         # ✅ 根目录 42 个包 + 前端 137 个包安装成功
+npm run build:frontend # ✅ tsc + Vite 构建通过（1492 modules）
+npm run build:node     # ✅ esbuild 打包 275.5 KB
+npm run verify         # ✅ 类型检查通过
+npm run test           # ✅ 17 项自检全过
+npm run dev            # ✅ 启动成功，http://127.0.0.1:8787 返回 200
 ```
 
 ---
@@ -311,6 +339,10 @@ npm run start:node
 ---
 
 ## ❓ 常见问题
+
+### 本仓库还能部署到 Cloudflare 吗？
+
+不能直接部署。本仓库已按「纯本机运行」改造：`package.json` 中的 `deploy`（`wrangler deploy`）与 `dev:backend`（`wrangler dev`）已移除，日常只需 `npm run dev`。若确实要恢复 Cloudflare 部署，需自行把这两个脚本加回并安装 Wrangler（`wrangler` 仍在 devDependencies 中，`wrangler.toml` 与 `.github/workflows/deploy.yml` 也保留着）。
 
 ### Cloudflare 版与自建版有什么区别？
 
