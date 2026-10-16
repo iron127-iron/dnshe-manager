@@ -1,7 +1,7 @@
 # NOTE: 名字沿用 dnshe-manager-backend（虽然现在前后端都在这一个 Worker 里）。
 #       改名等于新建一个 Worker，老部署的 secrets 与 D1 绑定都会留在旧脚本上，
 #       AES_KEY 一旦重新生成，库里已加密的 API Secret 就再也解不开了。
-name = "dnshe-manager-backend"
+name = "dnshe-manager-mome"
 main = "src/index.ts"
 compatibility_date = "2024-04-01"
 
