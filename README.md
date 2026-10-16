@@ -10,6 +10,12 @@ DNSHE-Manager 是一个面向 [DNSHE](https://my.dnshe.com) 用户的**多账号
 
 ### ⚡ 快速开始（本机运行）
 
+**方式 A：双击 `start.bat`**（Windows）
+
+首次运行会自动安装依赖 → 构建前端 → 打包后端 → 启动服务并自动打开浏览器到 http://127.0.0.1:8787；若服务已在运行则只打开浏览器。关闭窗口或 `Ctrl+C` 即停止服务。
+
+**方式 B：命令行**
+
 ```bash
 npm run setup     # 1. 安装后端 + 前端依赖
 npm run dev       # 2. 构建前端 + 打包后端 + 启动本机服务
@@ -261,7 +267,10 @@ DNSHE-Manager/
 ├── docker-compose.yml          # Docker Compose 编排
 ├── wrangler.toml               # Cloudflare Workers 配置（含静态资源托管 [assets]）
 ├── .env.example                # 环境变量示例
-└── package.json                # 后端依赖与脚本
+├── package.json                # 后端依赖与全部 npm run 指令
+├── start.bat                   # ⭐ Windows 一键启动（装依赖 → 构建 → 启动 → 开浏览器）
+├── data/                       # 本机数据 dnshe.db + aes.key（本地生成，需整体备份）
+└── dist-node/                  # 后端打包产物 server.mjs（本地生成）
 ```
 
 ---
