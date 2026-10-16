@@ -22,8 +22,8 @@ run_worker_first = ["/api/*"]
 # 绑定 D1 数据库
 [[d1_databases]]
 binding = "DB"
-name = "dnshe-manager-mome"
-database_id = "4f32b3b2-ddd7-4fde-80f0-f9d171c18ec2" # 用户部署时替换为实际的 D1 ID
+database_name = "dnshe-manager-db"
+database_id = "4f32b3b2-ddd7-4fde-80f0-f9d171c18ec2"
 
 # 定时任务：每天凌晨 2 点执行域名同步和到期检测自动续期
 [triggers]
